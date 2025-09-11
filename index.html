@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Glyph POC</title>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      background: #f9f9f9;
+      margin: 0;
+      padding: 2rem;
+    }
+    .container {
+      max-width: 700px;
+      margin: 0 auto;
+      background: white;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    }
+    .step {
+      display: none;
+    }
+    input, textarea {
+      width: 100%;
+      padding: 0.75rem;
+      margin: 1rem 0;
+      font-size: 1rem;
+    }
+    button {
+      padding: 0.75rem 1.5rem;
+      background: #4f46e5;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .question-box {
+      margin: 1rem 0;
+    }
+  </style>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+      svg: { fontCache: 'global' }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" async></script>
+</head>
+<body>
+  <div class="container">
+    <!-- Intro Step -->
+    <div id="intro" class="step">
+      <h2>Welcome!</h2>
+      <p>Please enter your name to begin.</p>
+      <input id="nameInput" placeholder="Your name" />
+      <button id="startBtn">Start</button>
+    </div>
+
+    <!-- Rank Step -->
+    <div id="rank" class="step">
+      <h2>Rank the Questions</h2>
+      <ul id="rankList"></ul>
+      <button id="toQuestion">Next</button>
+    </div>
+
+    <!-- Question Step -->
+    <div id="question" class="step">
+      <h2 id="questionTitle">Question</h2>
+      <div id="questionText" class="question-box"></div>
+      <textarea id="answerBox" placeholder="Type your answer here..."></textarea>
+      <button id="submitAnswer">Submit Answer</button>
+    </div>
+
+    <!-- Reflection Step -->
+    <div id="reflection" class="step">
+      <h2>Reflection</h2>
+      <textarea id="reflectionInput" placeholder="Reflect on the experience..."></textarea>
+      <button id="toSummary">Submit Reflection</button>
+    </div>
+
+    <!-- Summary Step -->
+    <div id="summary" class="step">
+      <h2>Summary</h2>
+      <pre id="summaryOutput"></pre>
+    </div>
+  </div>
+
+  <script>
+    const questions = [
+      { id: 'M1_Easy', label: 'Simplify $3y + 5y - 2$.' },
+      { id: 'M1_Basic', label: 'Evaluate $m^2 - \\dfrac{12}{m}$, when $m = 4$.' },
+      { id: 'M1_Moderate', label: 'You earn $35$ per hour tutoring. You already have $540$ in your savings. Write an expression for your total money after $h$ hours.' },
+      { id: 'M1_Challenging', label: 'Simplify $4x - 2(3x - 1) + 5$.' },
+      { id: 'M1_Advanced', label: 'Write $4(a-2)$ with no multiplication.' }
+    ];
+
+    const appState = {
+      step: "intro",
+      name: "",
+      ranking: [],
+      answers: [],
+      reflection: "",
+      currentQ: 0
+    };
+
+    function showStep(step) {
+      document.querySelectorAll(".step").forEach(div => div.style.display = "none");
+      document.getElementById(step).style.display = "block";
+      appState.step = step;
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      showStep("intro");
+
+      document.getElementById("startBtn").onclick = () => {
+        appState.name = document.getElementById("nameInput").value.trim();
+        appState.ranking = [...questions].sort(() => Math.random() - 0.5);
+        renderRankList();
+        showStep("rank");
+      };
+
+      document.getElementById("toQuestion").onclick = () => {
+        showQuestion();
+      };
+
+      document.getElementById("submitAnswer").onclick = () => {
+        const answer = document.getElementById("answerBox").value.trim();
+        appState.answers.push({
+          id: appState.ranking[appState.currentQ].id,
+          answer
+        });
+        appState.currentQ++;
+        if (appState.currentQ >= appState.ranking.length) {
+          showStep("reflection");
+        } else {
+          showQuestion();
+        }
+      };
+
+      document.getElementById("toSummary").onclick = () => {
+        appState.reflection = document.getElementById("reflectionInput").value.trim();
+        const output = {
+          name: appState.name,
+          answers: appState.answers,
+          reflection: appState.reflection
+        };
+        document.getElementById("summaryOutput").textContent = JSON.stringify(output, null, 2);
+        showStep("summary");
+      };
+    });
+
+    function renderRankList() {
+      const ul = document.getElementById("rankList");
+      ul.innerHTML = "";
+      appState.ranking.forEach((q, i) => {
+        const li = document.createElement("li");
+        li.textContent = `${i + 1}. ${q.label}`;
+        ul.appendChild(li);
+      });
+      MathJax.typesetPromise();
+    }
+
+    function showQuestion() {
+      const q = appState.ranking[appState.currentQ];
+      document.getElementById("questionTitle").textContent = `Question ${appState.currentQ + 1}`;
+      document.getElementById("questionText").innerHTML = q.label;
+      document.getElementById("answerBox").value = "";
+      showStep("question");
+      MathJax.typesetPromise();
+    }
+  </script>
+</body>
+</html>
