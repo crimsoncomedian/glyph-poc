@@ -59,29 +59,72 @@
     button:hover {
       background-color: #4338ca;
     }
-
     .question-block {
       margin: 1.5rem 0;
     }
-
-    .confidence-options {
+    .emoji-feedback {
+      font-size: 1.5rem;
       display: flex;
-      justify-content: space-between;
+      justify-content: flex-end;
+      gap: 1rem;
       margin-top: 0.5rem;
     }
-
-    .confidence-options label {
-      flex: 1;
-      text-align: center;
-      font-size: 0.9rem;
-    }
-
-    .confidence-options input {
-      margin-bottom: 0.25rem;
-    }
   </style>
+  <script>
+    const questions = [
+      { id: 'Q1', label: 'Simplify $3y + 5y - 2$' },
+      { id: 'Q2', label: 'Evaluate $m^2 - \\dfrac{12}{m}$, when $m = 4$' },
+      { id: 'Q3', label: 'Write $4(a-2)$ with no multiplication' },
+      { id: 'Q4', label: 'Simplify $4x - 2(3x - 1) + 5$' },
+      { id: 'Q5', label: 'You earn $35$ per hour tutoring. You already have $540$ in your savings. Write an expression for your total money after $h$ hours.' }
+    ];
 
-  <!-- MathJax -->
+    const renderRank = () => {
+      const container = document.getElementById('rankContainer');
+      container.innerHTML = '';
+      questions.forEach((q, i) => {
+        const div = document.createElement('div');
+        div.className = 'question-block';
+        div.innerHTML = `<strong>${i + 1}. ${q.label}</strong>`;
+        container.appendChild(div);
+      });
+      if (window.MathJax) MathJax.typesetPromise();
+    };
+
+    const renderConfidence = () => {
+      const container = document.getElementById('confidenceContainer');
+      container.innerHTML = '';
+      questions.forEach(q => {
+        const div = document.createElement('div');
+        div.className = 'question-block';
+        div.innerHTML = `
+          <div><strong>${q.label}</strong></div>
+          <div class="emoji-feedback">
+            <span>😟</span>
+            <span>😐</span>
+            <span>😄</span>
+          </div>
+        `;
+        container.appendChild(div);
+      });
+      if (window.MathJax) MathJax.typesetPromise();
+    };
+
+    const showStep = (step) => {
+      document.querySelectorAll('.step').forEach(el => el.classList.remove('active'));
+      document.getElementById(`step-${step}`).classList.add('active');
+      localStorage.setItem('current_step', step);
+      if (step === 'rank') renderRank();
+      if (step === 'confidence') renderConfidence();
+    };
+
+    window.addEventListener('DOMContentLoaded', () => {
+      const savedStep = localStorage.getItem('current_step');
+      if (savedStep && document.getElementById(`step-${savedStep}`)) {
+        showStep(savedStep);
+      }
+    });
+  </script>
   <script>
     window.MathJax = {
       tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
@@ -106,15 +149,15 @@
     <!-- Step: Rank -->
     <section id="step-rank" class="step">
       <h2>Rank Questions</h2>
-      <p>(This section will contain your ranking logic...)</p>
+      <div id="rankContainer"></div>
       <button onclick="showStep('confidence')">Next</button>
     </section>
 
     <!-- Step: Confidence -->
     <section id="step-confidence" class="step">
-      <h2>How confident are you that you could solve each question?</h2>
-      <div id="confidenceQuestions"></div>
-      <button id="confidenceNext">Next</button>
+      <h2>Rate Your Confidence</h2>
+      <div id="confidenceContainer"></div>
+      <button onclick="showStep('complete')">Next</button>
     </section>
 
     <!-- Step: Complete -->
@@ -126,13 +169,6 @@
   </div>
 
   <script>
-    const showStep = (step) => {
-      document.querySelectorAll('.step').forEach(el => el.classList.remove('active'));
-      document.getElementById(`step-${step}`).classList.add('active');
-      localStorage.setItem('current_step', step);
-      if (step === 'confidence') renderConfidence();
-    };
-
     document.getElementById('nameContinue').addEventListener('click', () => {
       const first = document.getElementById('firstName').value.trim();
       const last = document.getElementById('lastName').value.trim();
@@ -143,51 +179,6 @@
       localStorage.setItem('student_name', JSON.stringify({ first, last }));
       showStep('rank');
     });
-
-    document.getElementById('confidenceNext').addEventListener('click', () => {
-      const form = document.querySelectorAll('input[name^="conf_"]:checked');
-      const responses = {};
-      form.forEach(input => {
-        responses[input.name.replace('conf_', '')] = input.value;
-      });
-      localStorage.setItem('confidence', JSON.stringify(responses));
-      showStep('complete');
-    });
-
-    const confidenceQuestions = [
-      { id: 'Q1', label: 'Simplify $3y + 5y - 2$' },
-      { id: 'Q2', label: 'Evaluate $m^2 - \\dfrac{12}{m}$, when $m = 4$' },
-      { id: 'Q3', label: 'Write $4(a-2)$ with no multiplication' },
-      { id: 'Q4', label: 'Simplify $4x - 2(3x - 1) + 5$' },
-      { id: 'Q5', label: 'You earn $35$ per hour tutoring. You already have $540$ in your savings. Write an expression for your total money after $h$ hours.' }
-    ];
-
-    const renderConfidence = () => {
-      const container = document.getElementById('confidenceQuestions');
-      container.innerHTML = '';
-      confidenceQuestions.forEach(q => {
-        const div = document.createElement('div');
-        div.className = 'question-block';
-        div.innerHTML = `
-          <div><strong>${q.label}</strong></div>
-          <div class="confidence-options">
-            <label><input type="radio" name="conf_${q.id}" value="1" required /> Not confident</label>
-            <label><input type="radio" name="conf_${q.id}" value="2" /> Slightly confident</label>
-            <label><input type="radio" name="conf_${q.id}" value="3" /> Somewhat</label>
-            <label><input type="radio" name="conf_${q.id}" value="4" /> Confident</label>
-            <label><input type="radio" name="conf_${q.id}" value="5" /> Very confident</label>
-          </div>
-        `;
-        container.appendChild(div);
-      });
-      MathJax.typesetPromise(); // Re-render LaTeX
-    };
-
-    // Resume from saved step if present
-    const savedStep = localStorage.getItem('current_step');
-    if (savedStep && document.getElementById(`step-${savedStep}`)) {
-      showStep(savedStep);
-    }
   </script>
 </body>
 </html>
