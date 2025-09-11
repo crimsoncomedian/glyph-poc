@@ -2,174 +2,136 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Glyph POC</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Enter Your Name</title>
   <style>
     body {
       font-family: system-ui, sans-serif;
       background: #f9f9f9;
       margin: 0;
       padding: 2rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
     }
-    .container {
-      max-width: 700px;
-      margin: 0 auto;
-      background: white;
-      padding: 2rem;
+
+    main.container {
+      background: #fff;
+      padding: 2rem 2.5rem;
       border-radius: 12px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-    }
-    .step {
-      display: none;
-    }
-    input, textarea {
+      max-width: 500px;
       width: 100%;
-      padding: 0.75rem;
-      margin: 1rem 0;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    h2 {
+      font-size: 1.75rem;
+      margin-bottom: 1.25rem;
+      text-align: center;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    label {
+      font-weight: 500;
+      margin-bottom: 0.3rem;
+    }
+
+    input {
+      padding: 0.65rem 0.75rem;
+      border-radius: 8px;
+      border: 1px solid #ccc;
       font-size: 1rem;
     }
+
+    input:focus {
+      outline: none;
+      border-color: #4f46e5;
+      box-shadow: 0 0 0 3px #eef;
+    }
+
+    .row {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .row .form-group {
+      flex: 1 1 48%;
+    }
+
     button {
+      margin-top: 1rem;
       padding: 0.75rem 1.5rem;
       background: #4f46e5;
       color: white;
       border: none;
-      border-radius: 6px;
+      border-radius: 8px;
+      font-size: 1rem;
       cursor: pointer;
+      transition: background 0.2s ease;
     }
-    .question-box {
-      margin: 1rem 0;
+
+    button:hover {
+      background: #3730a3;
+    }
+
+    @media (max-width: 480px) {
+      .row {
+        flex-direction: column;
+      }
+
+      .row .form-group {
+        width: 100%;
+      }
     }
   </style>
-  <script>
-    window.MathJax = {
-      tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
-      svg: { fontCache: 'global' }
-    };
-  </script>
-  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" async></script>
 </head>
 <body>
-  <div class="container">
-    <!-- Intro Step -->
-    <div id="intro" class="step">
-      <h2>Welcome!</h2>
-      <p>Please enter your name to begin.</p>
-      <input id="nameInput" placeholder="Your name" />
-      <button id="startBtn">Start</button>
-    </div>
-
-    <!-- Rank Step -->
-    <div id="rank" class="step">
-      <h2>Rank the Questions</h2>
-      <ul id="rankList"></ul>
-      <button id="toQuestion">Next</button>
-    </div>
-
-    <!-- Question Step -->
-    <div id="question" class="step">
-      <h2 id="questionTitle">Question</h2>
-      <div id="questionText" class="question-box"></div>
-      <textarea id="answerBox" placeholder="Type your answer here..."></textarea>
-      <button id="submitAnswer">Submit Answer</button>
-    </div>
-
-    <!-- Reflection Step -->
-    <div id="reflection" class="step">
-      <h2>Reflection</h2>
-      <textarea id="reflectionInput" placeholder="Reflect on the experience..."></textarea>
-      <button id="toSummary">Submit Reflection</button>
-    </div>
-
-    <!-- Summary Step -->
-    <div id="summary" class="step">
-      <h2>Summary</h2>
-      <pre id="summaryOutput"></pre>
-    </div>
-  </div>
+  <main class="container">
+    <h2>Enter Your Name</h2>
+    <form id="nameForm">
+      <div class="row">
+        <div class="form-group">
+          <label for="firstName">First Name</label>
+          <input id="firstName" name="firstName" type="text" required />
+        </div>
+        <div class="form-group">
+          <label for="lastName">Last Name</label>
+          <input id="lastName" name="lastName" type="text" required />
+        </div>
+      </div>
+      <button type="submit">Continue</button>
+    </form>
+  </main>
 
   <script>
-    const questions = [
-      { id: 'M1_Easy', label: 'Simplify $3y + 5y - 2$.' },
-      { id: 'M1_Basic', label: 'Evaluate $m^2 - \\dfrac{12}{m}$, when $m = 4$.' },
-      { id: 'M1_Moderate', label: 'You earn $35$ per hour tutoring. You already have $540$ in your savings. Write an expression for your total money after $h$ hours.' },
-      { id: 'M1_Challenging', label: 'Simplify $4x - 2(3x - 1) + 5$.' },
-      { id: 'M1_Advanced', label: 'Write $4(a-2)$ with no multiplication.' }
-    ];
+    const form = document.getElementById("nameForm");
 
-    const appState = {
-      step: "intro",
-      name: "",
-      ranking: [],
-      answers: [],
-      reflection: "",
-      currentQ: 0
-    };
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
 
-    function showStep(step) {
-      document.querySelectorAll(".step").forEach(div => div.style.display = "none");
-      document.getElementById(step).style.display = "block";
-      appState.step = step;
-    }
+      const first = form.firstName.value.trim();
+      const last = form.lastName.value.trim();
 
-    document.addEventListener("DOMContentLoaded", () => {
-      showStep("intro");
+      if (!first || !last) return;
 
-      document.getElementById("startBtn").onclick = () => {
-        appState.name = document.getElementById("nameInput").value.trim();
-        appState.ranking = [...questions].sort(() => Math.random() - 0.5);
-        renderRankList();
-        showStep("rank");
-      };
+      const fullName = `${first} ${last}`;
+      localStorage.setItem("student_name", fullName);
 
-      document.getElementById("toQuestion").onclick = () => {
-        showQuestion();
-      };
-
-      document.getElementById("submitAnswer").onclick = () => {
-        const answer = document.getElementById("answerBox").value.trim();
-        appState.answers.push({
-          id: appState.ranking[appState.currentQ].id,
-          answer
-        });
-        appState.currentQ++;
-        if (appState.currentQ >= appState.ranking.length) {
-          showStep("reflection");
-        } else {
-          showQuestion();
-        }
-      };
-
-      document.getElementById("toSummary").onclick = () => {
-        appState.reflection = document.getElementById("reflectionInput").value.trim();
-        const output = {
-          name: appState.name,
-          answers: appState.answers,
-          reflection: appState.reflection
-        };
-        document.getElementById("summaryOutput").textContent = JSON.stringify(output, null, 2);
-        showStep("summary");
-      };
+      // Redirect to the next page
+      window.location.href = "rank.html";
     });
-
-    function renderRankList() {
-      const ul = document.getElementById("rankList");
-      ul.innerHTML = "";
-      appState.ranking.forEach((q, i) => {
-        const li = document.createElement("li");
-        li.textContent = `${i + 1}. ${q.label}`;
-        ul.appendChild(li);
-      });
-      MathJax.typesetPromise();
-    }
-
-    function showQuestion() {
-      const q = appState.ranking[appState.currentQ];
-      document.getElementById("questionTitle").textContent = `Question ${appState.currentQ + 1}`;
-      document.getElementById("questionText").innerHTML = q.label;
-      document.getElementById("answerBox").value = "";
-      showStep("question");
-      MathJax.typesetPromise();
-    }
   </script>
 </body>
 </html>
