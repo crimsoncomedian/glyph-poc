@@ -387,14 +387,19 @@
         }
 
         function proceedToComplete() {
-          const reflection = localStorage.getItem('reflection_response');
-          if (!reflection) {
-            showValidationError('reflectionError', 'Please select how the questions compared to your expectations.');
-            return;
-          }
-          hideValidationError('reflectionError');
-          showStep('complete');
-        }
+  const reflection = localStorage.getItem('reflection_response');
+  if (!reflection) {
+    showValidationError('reflectionError', 'Please select how the questions compared to your expectations.');
+    return;
+  }
+  hideValidationError('reflectionError');
+  
+  // ✅ Add this line:
+  sendResultsToSheet();
+
+  showStep('complete');
+}
+
 
         function normalizeSpaces(s) { return s.replace(/\s+/g, ' ').trim(); }
 
