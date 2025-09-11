@@ -489,9 +489,18 @@
           logDebug('--- Tests complete ---');
         }
       </script>
-<script>
-        window.MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] }, svg: { fontCache: 'global' } };
-      </script>
+   <script>
+  window.MathJax = {
+    tex: {
+      inlineMath: [['$', '$'], ['\\(', '\\)']]
+    },
+    svg: {
+      fontCache: 'global'
+    }
+  };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+
 <script async="" src="assets/script_cf5a3173.js"></script>
 <script>
             window.load_data_from_csv = (filename) => {
