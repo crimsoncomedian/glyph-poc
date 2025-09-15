@@ -3,19 +3,19 @@ function sendResultsToSheet() {
   const confidence = JSON.parse(localStorage.getItem('confidence') || '{}');
 
   const data = {
-    timestamp: new Date().toISOString(),
+    // 👇 Timestamp is generated in Apps Script, so you don’t need to send it
     studentName: `${student.first || ''} ${student.last || ''}`,
-    ranking: JSON.stringify(orderedQuestions),
-    confidence: JSON.stringify(confidence),
+    ranking: JSON.stringify(orderedQuestions),        // will land in "Ranking"
+    confidence: JSON.stringify(confidence),           // will land in "Confidence"
     q1Answer: localStorage.getItem('q1_answer'),
     q1Correct: localStorage.getItem('q1_correct') === 'true',
-    q1Time: 0, // you can replace with actual time tracking later
+    q1Time: localStorage.getItem('q1_time') || "",    // add real timers later
     q2Answer: localStorage.getItem('q2_answer'),
-    q2Time: 0, // optional time tracking
+    q2Time: localStorage.getItem('q2_time') || "",    // add real timers later
     reflection: localStorage.getItem('reflection_response')
   };
 
-  sendToGoogleSheet(data); // this function already exists in script_cf5a3173.js
+  sendToGoogleSheet(data);
 }
 
 function sendToGoogleSheet(data) {
@@ -30,22 +30,3 @@ function sendToGoogleSheet(data) {
     .then(response => console.log("Submitted:", response))
     .catch(err => console.error("Error submitting to sheet:", err));
 }
-
-function submitResults() {
-  const data = {
-    name: document.getElementById("studentName").value,
-    ranking: document.getElementById("ranking").value,
-    confidence: document.getElementById("confidence").value,
-    q1Answer: document.getElementById("q1Answer").value,
-    q1Correct: true,  // or compute this dynamically
-    q1Time: 13,        // replace with your timer
-    q2Answer: document.getElementById("q2Answer").value,
-    q2Time: 15,        // replace with your timer
-    reflection: document.getElementById("reflection").value
-  };
-
-  console.log("Sending this to Google Sheet:", data);
-  sendToGoogleSheet(data);
-}
-
-
