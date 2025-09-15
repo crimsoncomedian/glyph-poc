@@ -519,7 +519,25 @@
             window.call_llm = (system_prompt, user_messages, json_fields) => {
                 // Implementation needed when code is downloaded
             };
-        </script></head>
+        </script>
+
+    <script async src="assets/script_cf5a3173.js"></script>
+<script>
+  function proceedToComplete() {
+    const reflection = localStorage.getItem('reflection_response');
+    if (!reflection) {
+      showValidationError('reflectionError', 'Please select how the questions compared to your expectations.');
+      return;
+    }
+    hideValidationError('reflectionError');
+
+    // 🔑 This must be defined in script_cf5a3173.js
+    sendResultsToSheet(); 
+
+    showStep('complete');
+  }
+</script>
+</head>
 <body>
 <div class="container">
 <button class="reset-btn" onclick="resetApp()">Reset 🔄</button>
