@@ -3,15 +3,14 @@ function sendResultsToSheet() {
   const confidence = JSON.parse(localStorage.getItem('confidence') || '{}');
 
   const data = {
-    // 👇 Timestamp is generated in Apps Script, so you don’t need to send it
     studentName: `${student.first || ''} ${student.last || ''}`,
-    ranking: JSON.stringify(orderedQuestions),        // will land in "Ranking"
-    confidence: JSON.stringify(confidence),           // will land in "Confidence"
+    ranking: JSON.stringify(orderedQuestions),
+    confidence: JSON.stringify(confidence),
     q1Answer: localStorage.getItem('q1_answer'),
     q1Correct: localStorage.getItem('q1_correct') === 'true',
-    q1Time: localStorage.getItem('q1_time') || "",    // add real timers later
+    q1Time: localStorage.getItem('q1_time') || "",
     q2Answer: localStorage.getItem('q2_answer'),
-    q2Time: localStorage.getItem('q2_time') || "",    // add real timers later
+    q2Time: localStorage.getItem('q2_time') || "",
     reflection: localStorage.getItem('reflection_response')
   };
 
